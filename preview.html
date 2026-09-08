@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Countdown Wallpaper Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
   :root{
     --page:#0d0d0f;
@@ -11,7 +14,7 @@
     --muted:#8a8a90;
     --bezel:#1b1b1d;
     --bezel-edge:#2c2c2f;
-    --font:-apple-system,"SF Pro Display","SF Pro Text",system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font:"Inter",-apple-system,"SF Pro Display","SF Pro Text",system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -65,7 +68,7 @@
   .ios .clock{position:absolute;top:9.4cqh;left:0;right:0;text-align:center;font-size:19cqw;font-weight:600;letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 1px 12px rgba(0,0,0,0.35)}
 
   /* below-clock widget tray: Weather + Google Calendar */
-  .ios .tray{position:absolute;top:30cqh;left:0;right:0;display:flex;justify-content:center;gap:4cqw}
+  .ios .tray{position:absolute;top:27cqh;left:0;right:0;display:flex;justify-content:center;gap:4cqw}
   .ios .wdg{
     width:19cqw;height:19cqw;border-radius:4.6cqw;padding:2.5cqw;
     background:rgba(120,120,128,0.24);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -102,11 +105,11 @@
 <div class="wrap">
   <header>
     <p class="eyebrow">iPhone 13 &middot; lock screen</p>
-    <h1>The message leads; the year count supports it</h1>
+    <h1>The quote leads; the year count sits on the grid</h1>
     <p>The live <code>index.html</code> in an iPhone&nbsp;13 frame, with the real iOS clock, date
-      and a below-clock widget tray (Weather + Google Calendar) drawn on top. The top 41% of the
+      and a below-clock widget tray (Weather + Google Calendar) drawn on top. The top 40% of the
       wallpaper is kept clear for that chrome. Right frame adds a notification &mdash; it lands
-      below the message and grid.</p>
+      over the grid, below the quote.</p>
   </header>
 
   <div class="row">

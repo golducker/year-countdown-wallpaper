@@ -4,36 +4,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Year Countdown Wallpaper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
   /* ============================================================
      EDIT HERE
      Quote  : change the text after 'YOUR QUOTE' in the <script>
               below (or pass ?msg=Hello in the URL).
-     Accent : change --accent below (or pass ?accent=%23ff5500).
+     Accent : change --figure below (or pass ?accent=%23ff5500).
 
-     Layout reviewed against Apple HIG. iPhone 13, 1170x2532 (390x844 pt).
-     Palette: warm on pitch black. Quote = near-white (hero). Figures
-     (days left, %) = amber. Supporting words = warm light grey. Elapsed
-     days glow warm; remaining days are a cool faint track; today is
-     bright amber. White is reserved for the quote, amber for time.
-     Top 41% is kept clear for the iOS clock, date and widget tray.
+     Rendered at a real iPhone 13 viewport (390x844 pt @3x = 1170x2532).
+     Hierarchy: the QUOTE is the hero. Below it, the days-left status sits
+     directly on top of the 365-dot grid — they are the same information —
+     with a percent/date caption closing the block. The whole block is
+     optically centred in the area under the widgets.
+     Top 40% is kept clear for the iOS clock, date, and the below-clock
+     widget tray (Weather + Google Calendar).
      ============================================================ */
   :root{
     --bg:#000000;
     --label:#fcfaf6;                     /* the quote — nothing else */
-    --figure:#f7b54e;                    /* days-left + percent numbers */
-    --support:#d3cdc1;                   /* eyebrow + caption words (~13:1 on black) */
-    --accent:#f7b54e;                    /* today dot */
+    --figure:#f7b54e;                    /* days-left + percent numbers, today dot */
+    --support:#d3cdc1;                   /* status + caption words (~13:1 on black) */
     --fill-past:rgba(247,181,78,0.46);   /* elapsed — warm */
     --fill-future:rgba(255,255,255,0.15);/* remaining — cool, still visible */
-    --font:-apple-system,"SF Pro Display","SF Pro Text","SF Pro",system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font:"Inter",-apple-system,"SF Pro Display","SF Pro Text",system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{background:var(--bg);height:100%}
   body{
     display:grid;place-items:center;
     font-family:var(--font);color:var(--label);
-    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    -webkit-font-smoothing:antialiased;
     overflow:hidden;
   }
 
@@ -49,41 +52,46 @@
   }
 
   /* Status bar + clock + date + the below-clock widget tray live here. */
-  .safe-top{flex:0 0 41cqh}
+  .safe-top{flex:0 0 40cqh}
 
   .stack{
     flex:1 1 auto;min-height:0;
-    display:flex;flex-direction:column;justify-content:space-between;
-    padding:2.5cqh 0 10.5cqh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:2cqh 0 8.5cqh;
   }
 
-  /* eyebrow — small day count, sits under the widgets */
-  .eyebrow{
-    font-size:3.2cqw;font-weight:500;color:var(--support);
-    letter-spacing:0.015em;text-align:center;
-  }
-  .eyebrow b{font-weight:700;color:var(--figure)}
-
-  /* hero — the quote, centred in the free space */
+  /* hero */
   .quote{
-    align-self:center;max-width:84cqw;
-    font-size:9cqw;font-weight:600;line-height:1.12;letter-spacing:-0.015em;
+    max-width:84cqw;
+    font-size:8.6cqw;font-weight:600;line-height:1.14;letter-spacing:-0.018em;
     text-align:center;text-wrap:balance;color:var(--label);
   }
 
-  /* baseline — year-progress grid + one caption */
-  .bottom{display:flex;flex-direction:column;align-items:center;gap:2.6cqw}
-  .grid{display:grid;grid-template-columns:repeat(21,1fr);gap:0.9cqw;width:58cqw}
+  /* status sits directly on top of the grid — one unit */
+  .stats{margin-top:5.5cqh;display:flex;flex-direction:column;align-items:center;width:100%}
+  .status{
+    font-size:5.2cqw;font-weight:500;line-height:1.2;
+    color:var(--support);letter-spacing:-0.005em;
+  }
+  .status b{font-weight:700;color:var(--figure)}
+
+  .grid{
+    margin-top:2.2cqh;
+    display:grid;grid-template-columns:repeat(27,1fr);
+    gap:0.7cqw;width:84cqw;
+  }
   .dot{width:100%;aspect-ratio:1;border-radius:50%;background:var(--fill-future)}
   .dot.past{background:var(--fill-past)}
   .dot.today{
-    background:var(--accent);
-    box-shadow:0 0 0 0.7cqw rgba(247,181,78,0.30),
-               0 0 1.9cqw rgba(247,181,78,0.55);
+    background:var(--figure);
+    box-shadow:0 0 0 0.55cqw rgba(247,181,78,0.30),
+               0 0 1.6cqw rgba(247,181,78,0.55);
   }
+
   .meta{
-    font-size:3.1cqw;font-weight:500;color:var(--support);
-    font-variant-numeric:tabular-nums;letter-spacing:0.015em;
+    margin-top:2.2cqh;
+    font-size:3.5cqw;font-weight:500;color:var(--support);
+    font-variant-numeric:tabular-nums;
   }
   .meta b{font-weight:700;color:var(--figure)}
 </style>
@@ -92,11 +100,11 @@
   <div class="frame">
     <div class="safe-top"></div>
     <div class="stack">
-      <p class="eyebrow" id="eyebrow">&mdash;</p>
       <p class="quote" id="msg">Do the hard things, especially when you don&rsquo;t want to</p>
-      <div class="bottom">
+      <div class="stats">
+        <p class="status" id="status">&mdash;</p>
         <div class="grid" id="grid" role="img" aria-label="Year progress"></div>
-        <span class="meta" id="meta"></span>
+        <p class="meta" id="meta"></p>
       </div>
     </div>
   </div>
@@ -109,10 +117,7 @@
     var MESSAGE = params.get('msg') || "Do the hard things, especially when you don’t want to";
 
     var accent = params.get('accent');
-    if (accent){
-      document.documentElement.style.setProperty('--accent', accent);
-      document.documentElement.style.setProperty('--figure', accent);
-    }
+    if (accent) document.documentElement.style.setProperty('--figure', accent);
 
     // Date: prefer an explicit ?date=YYYY-MM-DD (the Shortcut passes the
     // phone's local date), otherwise fall back to this machine's clock.
@@ -135,9 +140,9 @@
 
     var dateStr = now.toLocaleDateString([], {weekday:'short', day:'numeric', month:'short'});
 
-    document.getElementById('eyebrow').innerHTML =
-      '<b>' + daysLeft + '</b> ' + (daysLeft === 1 ? 'day' : 'days') + ' left in ' + year;
     document.getElementById('msg').textContent = MESSAGE;
+    document.getElementById('status').innerHTML =
+      '<b>' + daysLeft + '</b> ' + (daysLeft === 1 ? 'day' : 'days') + ' left in ' + year;
     document.getElementById('meta').innerHTML =
       '<b>' + pctDone + '%</b> of ' + year + ' · ' + dateStr;
 

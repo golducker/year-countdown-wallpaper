@@ -20,21 +20,20 @@ always current. No backend, no build step.
 
 ## Put it on your iPhone (auto-updating)
 
-**1. Shortcut** (this exact order — it guarantees a fresh render every day)
+**1. Shortcut** (this exact order — it guarantees a sharp, fresh render every day)
 
 1. **Current Date**
 2. **Format Date** &rarr; Date Format: *Custom*, format string `yyyy-MM-dd`
-3. **Text**:
-   `https://image.thum.io/get/width/1170/crop/2532/noanimate/https://year-countdown-wallpaper.vercel.app/?date=`
-   then tap the end and insert the **Formatted Date** variable from step 2
+3. **Text** &mdash; paste part A, insert the **Formatted Date** variable, then paste part B
+   with no spaces anywhere:
+
+   *A:*
+   `https://api.microlink.io/?url=https://year-countdown-wallpaper.vercel.app/%3Fdate%3D`
+
+   *B:*
+   `&screenshot=true&meta=false&embed=screenshot.url&viewport.width=390&viewport.height=844&viewport.deviceScaleFactor=3&screenshot.type=png`
 4. **Get Contents of URL** &rarr; input: the **Text** from step 3
 5. **Set Wallpaper** &rarr; Lock Screen, turn off *Show Preview*
-
-Why the date in the URL: it makes each day's URL unique, so thum.io can never serve
-yesterday's cached image, and the page counts down from *your phone's* local date rather
-than the render server's clock. A minimal version without the date
-(`.../noanimate/maxAge/1/https://year-countdown-wallpaper.vercel.app/`) also works but can
-lag by a day across time zones.
 
 **2. Automation**
 
@@ -42,9 +41,23 @@ lag by a day across time zones.
 - **Run Immediately**, turn off *Notify When Run*
 - Run the shortcut from step 1
 
-`thum.io` renders the page in a headless browser and returns a PNG (free, no API key). It sees
-the page URL and the quote text, nothing else. For a fully private setup, render the PNG on
-your own machine on a schedule and sync it to a Photos album the automation reads from.
+### Why this renderer
+
+The obvious choice, `thum.io`, **cannot produce a portrait image** &mdash; `crop/{height}` does
+not set the height, and every combination returns a square (`width/1170/crop/2532` &rarr;
+1170&times;1170). iOS then upscales and crops that square to fill a 1170&times;2532 screen,
+which is why it looked soft and off-centre.
+
+`microlink` emulates a real iPhone 13 viewport (390&times;844 pt at `deviceScaleFactor=3`) and
+returns an exact **1170&times;2532** PNG &mdash; pixel-for-pixel with the screen, no rescaling.
+
+The date inside the `url` parameter does two jobs: it makes each day's request unique so no
+cached image can be reused, and it pins the countdown to *your phone's* date rather than the
+render server's clock (which is several hours off in most time zones).
+
+Privacy: microlink fetches the page URL and renders it. It sees the URL and the quote text,
+nothing else. For a fully private setup, render the PNG on your own machine on a schedule and
+sync it to a Photos album the automation reads from.
 
 ## Customize
 
