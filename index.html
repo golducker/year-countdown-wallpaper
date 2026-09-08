@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Year Countdown Wallpaper</title>
+<style>
+  /* ============================================================
+     EDIT HERE
+     Message : change the text after 'YOUR MESSAGE' in the <script>
+               at the bottom (or pass ?msg=Hello in the URL).
+     Accent  : change --accent below (or pass ?accent=%23ff5500).
+     Reviewed against Apple HIG — iPhone 13, 1170x2532 (390x844 pt).
+     ============================================================ */
+  :root{
+    --bg:#000000;
+    --accent:#f5b24b;                         /* reserved: TODAY dot + the percentage */
+    --label:#ffffff;                          /* iOS label (dark)          */
+    --label-secondary:rgba(235,235,245,0.60); /* iOS secondaryLabel (dark) */
+    --fill-past:rgba(255,255,255,0.22);
+    --fill-future:rgba(255,255,255,0.06);
+    --font:-apple-system,"SF Pro Display","SF Pro Text","SF Pro",system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);height:100%}
+  body{
+    display:grid;place-items:center;
+    font-family:var(--font);color:var(--label);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    overflow:hidden;
+  }
+
+  /* Phone-shaped canvas: fills a portrait phone screen exactly,
+     letterboxes on a desktop preview. iPhone 13 = 1170x2532. */
+  .frame{
+    width:min(100vw, calc(100vh * 1170 / 2532));
+    height:min(100vh, calc(100vw * 2532 / 1170));
+    background:var(--bg);
+    container-type:size;
+    display:flex;flex-direction:column;
+    padding:0 8cqw;
+  }
+
+  /* Cleared for the iOS status bar / notch, clock, date and widget row. */
+  .safe-top{flex:0 0 36cqh}
+
+  /* Content is top-aligned so the primary number sits just under the safe
+     zone — the spot least likely to be covered by notifications. */
+  .stack{
+    flex:1 1 auto;min-height:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    gap:3.2cqh;
+    padding:1.5cqh 0 9cqh;
+  }
+
+  .count{display:flex;flex-direction:column;align-items:center;gap:1cqw}
+  .count .num{
+    font-size:14cqw;font-weight:600;line-height:0.95;
+    letter-spacing:-0.02em;font-variant-numeric:tabular-nums;
+    color:var(--label);
+  }
+  .count .sub{
+    font-size:3.7cqw;font-weight:400;line-height:1.2;
+    color:var(--label-secondary);
+  }
+
+  .grid{
+    display:grid;grid-template-columns:repeat(21,1fr);
+    gap:1cqw;width:80cqw;
+  }
+  .dot{width:100%;aspect-ratio:1;border-radius:50%;background:var(--fill-future)}
+  .dot.past{background:var(--fill-past)}
+  .dot.today{
+    background:var(--accent);
+    box-shadow:0 0 0 0.8cqw rgba(245,178,75,0.24),
+               0 0 1.4cqw rgba(245,178,75,0.40);
+  }
+
+  .meta{display:flex;flex-direction:column;align-items:center;gap:1.6cqw;max-width:78cqw}
+  .meta .stat{
+    font-size:3.2cqw;font-weight:400;color:var(--label-secondary);
+    font-variant-numeric:tabular-nums;
+  }
+  .meta .stat b{font-weight:600;color:var(--accent)}
+  .meta .msg{
+    font-size:3.8cqw;font-weight:400;line-height:1.3;text-align:center;
+    color:var(--label);opacity:0.92;text-wrap:balance;
+  }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="safe-top"></div>
+    <div class="stack">
+      <div class="count">
+        <span class="num" id="num">—</span>
+        <span class="sub" id="sub">days left</span>
+      </div>
+      <div class="grid" id="grid" role="img" aria-label="Year progress"></div>
+      <div class="meta">
+        <span class="stat" id="stat"></span>
+        <span class="msg" id="msg"></span>
+      </div>
+    </div>
+  </div>
+
+<script>
+  (function(){
+    var params = new URLSearchParams(location.search);
+
+    /* ---- YOUR MESSAGE (edit the text in quotes) ---- */
+    var MESSAGE = params.get('msg') || "Your message here";
+
+    var accent = params.get('accent');
+    if (accent) document.documentElement.style.setProperty('--accent', accent);
+
+    var now;
+    var dp = params.get('date');
+    if (dp && /^\d{4}-\d{2}-\d{2}$/.test(dp)){
+      var p = dp.split('-');
+      now = new Date(+p[0], +p[1]-1, +p[2], 12, 0, 0);
+    } else {
+      now = new Date();
+    }
+
+    var year = now.getFullYear();
+    var startOfYear = new Date(year, 0, 1);
+    var isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    var totalDays = isLeap ? 366 : 365;
+    var dayOfYear = Math.floor((now - startOfYear) / 86400000) + 1;
+    var daysLeft = totalDays - dayOfYear;
+    var pctDone = Math.round((dayOfYear / totalDays) * 100);
+
+    var dateStr = now.toLocaleDateString([], {weekday:'short', day:'numeric', month:'short'});
+
+    document.getElementById('num').textContent = daysLeft;
+    document.getElementById('sub').textContent =
+      (daysLeft === 1 ? 'day' : 'days') + ' left in ' + year;
+    document.getElementById('stat').innerHTML =
+      '<b>' + pctDone + '%</b> of ' + year + ' · ' + dateStr;
+    document.getElementById('msg').textContent = MESSAGE;
+
+    var grid = document.getElementById('grid');
+    grid.setAttribute('aria-label',
+      dayOfYear + ' of ' + totalDays + ' days of ' + year + ' elapsed');
+    var frag = document.createDocumentFragment();
+    for (var i = 1; i <= totalDays; i++){
+      var d = document.createElement('span');
+      d.className = 'dot' + (i < dayOfYear ? ' past' : i === dayOfYear ? ' today' : '');
+      frag.appendChild(d);
+    }
+    grid.appendChild(frag);
+  })();
+</script>
+</body>
+</html>
