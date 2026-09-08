@@ -20,20 +20,18 @@ always current. No backend, no build step.
 
 ## Put it on your iPhone (auto-updating)
 
-**1. Shortcut** (this exact order — it guarantees a sharp, fresh render every day)
+**1. Shortcut** &mdash; two actions, one fixed URL, no variables:
 
-1. **Current Date**
-2. **Format Date** &rarr; Date Format: *Custom*, format string `yyyy-MM-dd`
-3. **Text** &mdash; paste this, then insert the **Formatted Date** variable right at the end
-   (no space, nothing after it):
+1. **Get Contents of URL**:
 
-   `https://year-countdown-wallpaper.vercel.app/shot/`
-4. **Get Contents of URL** &rarr; input: the **Text** from step 3
-5. **Set Wallpaper** &rarr; Lock Screen, turn off *Show Preview*
+   `https://year-countdown-wallpaper.vercel.app/shot`
+2. **Set Wallpaper** &rarr; Lock Screen, turn off *Show Preview*
 
-The finished URL looks like `https://year-countdown-wallpaper.vercel.app/shot/2026-09-08`.
+That's the whole thing. `/shot` resolves today's date on the server, so there is nothing for
+the Shortcut to build and nothing to get wrong.
+
 To bypass the render cache immediately (e.g. right after editing the quote), open
-`.../shot/2026-09-08?force=1` once in a browser.
+`.../shot?force=1` once in a browser.
 
 **2. Automation**
 
@@ -41,26 +39,33 @@ To bypass the render cache immediately (e.g. right after editing the quote), ope
 - **Run Immediately**, turn off *Notify When Run*
 - Run the shortcut from step 1
 
-### How `/shot/<date>` works, and why it exists
+### How `/shot` works, and why it exists
 
-[`api/shot.js`](api/shot.js) takes a plain date path and 302-redirects to a `microlink` render
+[`api/shot.js`](api/shot.js) resolves today's date, then 302-redirects to a `microlink` render
 of the page at a real iPhone 13 viewport (390&times;844 pt at `deviceScaleFactor=3`), which
 returns an exact **1170&times;2532** PNG &mdash; pixel-for-pixel with the screen, no rescaling.
 
-Two problems it solves:
+| Route | Result |
+| --- | --- |
+| `/shot` | today, in `Asia/Ho_Chi_Minh` |
+| `/shot?tz=Europe/Paris` | today, in another time zone |
+| `/shot/2026-12-25` | a specific day |
+| `/shot?force=1` | bypass the render cache |
+
+It exists because everything simpler than this broke:
 
 - **`thum.io` cannot produce a portrait image.** `crop/{height}` does not set height; every
-  combination returns a square (`width/1170/crop/2532` &rarr; 1170&times;1170). iOS then
-  upscaled and cropped that square to fill the screen, which is why it looked soft and
-  off-centre.
+  combination returns a square (`width/1170/crop/2532` &rarr; 1170&times;1170). iOS upscaled
+  and cropped that square to fill the screen &mdash; soft, and off-centre.
 - **iOS Shortcuts mangles `&` in a hand-built URL.** Given the full microlink URL, Shortcuts
-  absorbed everything after the first `&` into the `url=` value, so microlink returned JSON
-  metadata and Set Wallpaper painted a wall of text. A plain path with no query string and no
-  `&` removes that failure mode entirely.
+  absorbed everything after the first `&` into the `url=` value; microlink returned JSON
+  metadata and Set Wallpaper painted a wall of text.
+- **Appending a date variable lost the trailing slash**, producing `/shot2026-09-08` &rarr; a
+  404 page, painted as the wallpaper. (A rewrite now catches that form too, but the date is no
+  longer needed at all.)
 
-The date in the path does two jobs: each day is a unique URL so no cached image can be reused,
-and the countdown is pinned to *your phone's* date rather than the render server's clock
-(which is several hours off in most time zones).
+Resolving the date server-side also keeps the countdown on *your* calendar day rather than the
+render server's clock, and makes each day's microlink URL unique so no cached image is reused.
 
 The redirect is deliberate &mdash; your phone fetches the image from microlink directly, on its
 own IP, instead of routing through Vercel's shared egress addresses.
