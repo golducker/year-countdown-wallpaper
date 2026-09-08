@@ -1,27 +1,53 @@
-// GET /shot/YYYY-MM-DD  (rewritten here by vercel.json)
+// GET /shot                 -> today's wallpaper (date resolved server-side)
+// GET /shot/YYYY-MM-DD      -> a specific day
+// GET /shot?tz=Europe/Paris -> today in another time zone
+// GET /shot?force=1         -> bypass the render cache
 //
-// Redirects to a microlink render of the wallpaper at a real iPhone 13
-// viewport (390x844 pt @3x => exactly 1170x2532 px).
+// Redirects to a microlink render of the page at a real iPhone 13 viewport
+// (390x844 pt @3x => exactly 1170x2532 px).
 //
-// Why this exists: the full microlink URL needs several "&" parameters, and
-// iOS Shortcuts mangles those when you build the string in a Text action —
-// everything after the first "&" gets absorbed into the url= value and you
-// get JSON back instead of an image. Keeping the phone-facing URL to a plain
-// path with no query string and no "&" avoids that entirely.
+// Design note — this endpoint exists to keep the phone-facing URL trivial.
+// Two things broke when the Shortcut had to build the URL itself:
+//   1. iOS Shortcuts absorbed everything after the first "&" of the full
+//      microlink URL into its url= value, so microlink returned JSON
+//      metadata and Set Wallpaper painted a wall of text.
+//   2. Appending a date variable to ".../shot/" lost the trailing slash,
+//      producing "/shot2026-09-08" and a 404.
+// Hence: no query string, no "&", and no variable to append. "/shot" alone
+// is enough, because the date is resolved here.
 //
-// This issues a redirect rather than proxying the bytes, so the phone fetches
-// from microlink directly (its own IP, its own rate-limit budget) instead of
-// going through Vercel's shared egress addresses.
+// The redirect is deliberate: the phone fetches the image from microlink
+// directly, on its own IP, rather than through Vercel's shared egress.
 
 const SITE = 'https://year-countdown-wallpaper.vercel.app/';
+const DEFAULT_TZ = 'Asia/Ho_Chi_Minh';
+
+// en-CA formats as YYYY-MM-DD, which is what the page expects.
+function todayIn(tz) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+}
 
 export default function handler(req, res) {
   const raw = req.query.date;
-  const date = typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : null;
+  let date = typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : null;
 
-  // The page reads ?date= so the countdown follows the phone's timezone
-  // rather than the render server's clock.
-  const target = date ? `${SITE}?date=${date}` : SITE;
+  if (!date) {
+    const tz = typeof req.query.tz === 'string' && req.query.tz ? req.query.tz : DEFAULT_TZ;
+    try {
+      date = todayIn(tz);
+    } catch {
+      date = todayIn('UTC'); // unknown time zone string
+    }
+  }
+
+  // The page reads ?date= so the countdown follows this date, not the
+  // render server's clock.
+  const target = `${SITE}?date=${date}`;
 
   const api =
     'https://api.microlink.io/?url=' + encodeURIComponent(target) +
@@ -34,6 +60,6 @@ export default function handler(req, res) {
     '&screenshot.type=png' +
     (req.query.force !== undefined ? '&force=true' : '');
 
-  res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+  res.setHeader('Cache-Control', 'no-store');
   res.redirect(302, api);
 }
