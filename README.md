@@ -24,8 +24,12 @@ always current. No backend, no build step.
 
 - Shortcuts app &rarr; new shortcut
 - **Get Contents of URL**:
-  `https://image.thum.io/get/width/1170/crop/2532/noanimate/https://year-countdown-wallpaper.vercel.app/`
+  `https://image.thum.io/get/width/1170/crop/2532/noanimate/maxAge/1/https://year-countdown-wallpaper.vercel.app/`
 - **Set Wallpaper** &rarr; Lock Screen, turn off *Show Preview*
+
+`maxAge/1` tells thum.io to re-render if its cached image is over 1 hour old, so the daily
+run is always fresh. To force a render right now (e.g. after editing the quote), add a
+throwaway query that changes each time, like `.../vercel.app/?v=2` &rarr; `?v=3`.
 
 **2. Automation**
 
@@ -41,7 +45,7 @@ your own machine on a schedule and sync it to a Photos album the automation read
 
 Edit [`index.html`](index.html):
 
-- **Message** &mdash; the string after `YOUR MESSAGE` in the `<script>`
+- **Quote** &mdash; the string after `YOUR QUOTE` in the `<script>`
 - **Accent** &mdash; `--accent` in `:root`
 
 Or override per request with query params (no edit needed):
