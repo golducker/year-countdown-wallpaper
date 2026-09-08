@@ -20,16 +20,21 @@ always current. No backend, no build step.
 
 ## Put it on your iPhone (auto-updating)
 
-**1. Shortcut**
+**1. Shortcut** (this exact order — it guarantees a fresh render every day)
 
-- Shortcuts app &rarr; new shortcut
-- **Get Contents of URL**:
-  `https://image.thum.io/get/width/1170/crop/2532/noanimate/maxAge/1/https://year-countdown-wallpaper.vercel.app/`
-- **Set Wallpaper** &rarr; Lock Screen, turn off *Show Preview*
+1. **Current Date**
+2. **Format Date** &rarr; Date Format: *Custom*, format string `yyyy-MM-dd`
+3. **Text**:
+   `https://image.thum.io/get/width/1170/crop/2532/noanimate/https://year-countdown-wallpaper.vercel.app/?date=`
+   then tap the end and insert the **Formatted Date** variable from step 2
+4. **Get Contents of URL** &rarr; input: the **Text** from step 3
+5. **Set Wallpaper** &rarr; Lock Screen, turn off *Show Preview*
 
-`maxAge/1` tells thum.io to re-render if its cached image is over 1 hour old, so the daily
-run is always fresh. To force a render right now (e.g. after editing the quote), add a
-throwaway query that changes each time, like `.../vercel.app/?v=2` &rarr; `?v=3`.
+Why the date in the URL: it makes each day's URL unique, so thum.io can never serve
+yesterday's cached image, and the page counts down from *your phone's* local date rather
+than the render server's clock. A minimal version without the date
+(`.../noanimate/maxAge/1/https://year-countdown-wallpaper.vercel.app/`) also works but can
+lag by a day across time zones.
 
 **2. Automation**
 
@@ -38,7 +43,7 @@ throwaway query that changes each time, like `.../vercel.app/?v=2` &rarr; `?v=3`
 - Run the shortcut from step 1
 
 `thum.io` renders the page in a headless browser and returns a PNG (free, no API key). It sees
-the page URL and the message text, nothing else. For a fully private setup, render the PNG on
+the page URL and the quote text, nothing else. For a fully private setup, render the PNG on
 your own machine on a schedule and sync it to a Photos album the automation reads from.
 
 ## Customize

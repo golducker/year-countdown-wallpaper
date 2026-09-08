@@ -12,20 +12,20 @@
      Accent : change --accent below (or pass ?accent=%23ff5500).
 
      Layout reviewed against Apple HIG. iPhone 13, 1170x2532 (390x844 pt).
-     Hierarchy: the QUOTE is the hero — largest, pure white, centred in
-     the free space. A small day-count sits above it as an eyebrow; the
-     dot grid + one caption form a quiet baseline.
-     Top 41% is left clear for the iOS clock, date, and the below-clock
-     widget tray (Weather + Google Calendar).
+     Palette: warm on pitch black. Quote = near-white (hero). Figures
+     (days left, %) = amber. Supporting words = warm light grey. Elapsed
+     days glow warm; remaining days are a cool faint track; today is
+     bright amber. White is reserved for the quote, amber for time.
+     Top 41% is kept clear for the iOS clock, date and widget tray.
      ============================================================ */
   :root{
     --bg:#000000;
-    --accent:#f5b24b;                          /* reserved: TODAY dot only   */
-    --label:#ffffff;                           /* the quote — nothing else    */
-    --label-strong:rgba(235,235,245,0.85);     /* emphasised figures          */
-    --label-secondary:rgba(235,235,245,0.60);  /* eyebrow, caption            */
-    --fill-past:rgba(255,255,255,0.16);
-    --fill-future:rgba(255,255,255,0.045);
+    --label:#fcfaf6;                     /* the quote — nothing else */
+    --figure:#f7b54e;                    /* days-left + percent numbers */
+    --support:#d3cdc1;                   /* eyebrow + caption words (~13:1 on black) */
+    --accent:#f7b54e;                    /* today dot */
+    --fill-past:rgba(247,181,78,0.46);   /* elapsed — warm */
+    --fill-future:rgba(255,255,255,0.15);/* remaining — cool, still visible */
     --font:-apple-system,"SF Pro Display","SF Pro Text","SF Pro",system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -59,10 +59,10 @@
 
   /* eyebrow — small day count, sits under the widgets */
   .eyebrow{
-    font-size:3cqw;font-weight:400;color:var(--label-secondary);
-    letter-spacing:0.01em;text-align:center;
+    font-size:3.2cqw;font-weight:500;color:var(--support);
+    letter-spacing:0.015em;text-align:center;
   }
-  .eyebrow b{font-weight:600;color:var(--label-strong)}
+  .eyebrow b{font-weight:700;color:var(--figure)}
 
   /* hero — the quote, centred in the free space */
   .quote{
@@ -71,21 +71,21 @@
     text-align:center;text-wrap:balance;color:var(--label);
   }
 
-  /* baseline — quiet year-progress grid + one caption */
-  .bottom{display:flex;flex-direction:column;align-items:center;gap:2.4cqw}
-  .grid{display:grid;grid-template-columns:repeat(21,1fr);gap:0.85cqw;width:54cqw}
+  /* baseline — year-progress grid + one caption */
+  .bottom{display:flex;flex-direction:column;align-items:center;gap:2.6cqw}
+  .grid{display:grid;grid-template-columns:repeat(21,1fr);gap:0.9cqw;width:58cqw}
   .dot{width:100%;aspect-ratio:1;border-radius:50%;background:var(--fill-future)}
   .dot.past{background:var(--fill-past)}
   .dot.today{
     background:var(--accent);
-    box-shadow:0 0 0 0.65cqw rgba(245,178,75,0.22),
-               0 0 1.3cqw rgba(245,178,75,0.40);
+    box-shadow:0 0 0 0.7cqw rgba(247,181,78,0.30),
+               0 0 1.9cqw rgba(247,181,78,0.55);
   }
   .meta{
-    font-size:2.9cqw;font-weight:400;color:var(--label-secondary);
-    font-variant-numeric:tabular-nums;letter-spacing:0.01em;
+    font-size:3.1cqw;font-weight:500;color:var(--support);
+    font-variant-numeric:tabular-nums;letter-spacing:0.015em;
   }
-  .meta b{font-weight:600;color:var(--label-strong)}
+  .meta b{font-weight:700;color:var(--figure)}
 </style>
 </head>
 <body>
@@ -109,8 +109,13 @@
     var MESSAGE = params.get('msg') || "Do the hard things, especially when you don’t want to";
 
     var accent = params.get('accent');
-    if (accent) document.documentElement.style.setProperty('--accent', accent);
+    if (accent){
+      document.documentElement.style.setProperty('--accent', accent);
+      document.documentElement.style.setProperty('--figure', accent);
+    }
 
+    // Date: prefer an explicit ?date=YYYY-MM-DD (the Shortcut passes the
+    // phone's local date), otherwise fall back to this machine's clock.
     var now;
     var dp = params.get('date');
     if (dp && /^\d{4}-\d{2}-\d{2}$/.test(dp)){
