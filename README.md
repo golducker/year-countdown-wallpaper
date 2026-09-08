@@ -24,16 +24,16 @@ always current. No backend, no build step.
 
 1. **Current Date**
 2. **Format Date** &rarr; Date Format: *Custom*, format string `yyyy-MM-dd`
-3. **Text** &mdash; paste part A, insert the **Formatted Date** variable, then paste part B
-   with no spaces anywhere:
+3. **Text** &mdash; paste this, then insert the **Formatted Date** variable right at the end
+   (no space, nothing after it):
 
-   *A:*
-   `https://api.microlink.io/?url=https://year-countdown-wallpaper.vercel.app/%3Fdate%3D`
-
-   *B:*
-   `&screenshot=true&meta=false&embed=screenshot.url&viewport.width=390&viewport.height=844&viewport.deviceScaleFactor=3&screenshot.type=png`
+   `https://year-countdown-wallpaper.vercel.app/shot/`
 4. **Get Contents of URL** &rarr; input: the **Text** from step 3
 5. **Set Wallpaper** &rarr; Lock Screen, turn off *Show Preview*
+
+The finished URL looks like `https://year-countdown-wallpaper.vercel.app/shot/2026-09-08`.
+To bypass the render cache immediately (e.g. right after editing the quote), open
+`.../shot/2026-09-08?force=1` once in a browser.
 
 **2. Automation**
 
@@ -41,19 +41,29 @@ always current. No backend, no build step.
 - **Run Immediately**, turn off *Notify When Run*
 - Run the shortcut from step 1
 
-### Why this renderer
+### How `/shot/<date>` works, and why it exists
 
-The obvious choice, `thum.io`, **cannot produce a portrait image** &mdash; `crop/{height}` does
-not set the height, and every combination returns a square (`width/1170/crop/2532` &rarr;
-1170&times;1170). iOS then upscales and crops that square to fill a 1170&times;2532 screen,
-which is why it looked soft and off-centre.
-
-`microlink` emulates a real iPhone 13 viewport (390&times;844 pt at `deviceScaleFactor=3`) and
+[`api/shot.js`](api/shot.js) takes a plain date path and 302-redirects to a `microlink` render
+of the page at a real iPhone 13 viewport (390&times;844 pt at `deviceScaleFactor=3`), which
 returns an exact **1170&times;2532** PNG &mdash; pixel-for-pixel with the screen, no rescaling.
 
-The date inside the `url` parameter does two jobs: it makes each day's request unique so no
-cached image can be reused, and it pins the countdown to *your phone's* date rather than the
-render server's clock (which is several hours off in most time zones).
+Two problems it solves:
+
+- **`thum.io` cannot produce a portrait image.** `crop/{height}` does not set height; every
+  combination returns a square (`width/1170/crop/2532` &rarr; 1170&times;1170). iOS then
+  upscaled and cropped that square to fill the screen, which is why it looked soft and
+  off-centre.
+- **iOS Shortcuts mangles `&` in a hand-built URL.** Given the full microlink URL, Shortcuts
+  absorbed everything after the first `&` into the `url=` value, so microlink returned JSON
+  metadata and Set Wallpaper painted a wall of text. A plain path with no query string and no
+  `&` removes that failure mode entirely.
+
+The date in the path does two jobs: each day is a unique URL so no cached image can be reused,
+and the countdown is pinned to *your phone's* date rather than the render server's clock
+(which is several hours off in most time zones).
+
+The redirect is deliberate &mdash; your phone fetches the image from microlink directly, on its
+own IP, instead of routing through Vercel's shared egress addresses.
 
 Privacy: microlink fetches the page URL and renders it. It sees the URL and the quote text,
 nothing else. For a fully private setup, render the PNG on your own machine on a schedule and
