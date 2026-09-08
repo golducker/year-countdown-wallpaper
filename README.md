@@ -12,8 +12,8 @@ clone you fully control.
 
 | Page | URL |
 | --- | --- |
-| Wallpaper (screenshot this) | `https://<your-domain>/` |
-| iPhone-frame preview | `https://<your-domain>/preview` |
+| Wallpaper (screenshot this) | <https://year-countdown-wallpaper.vercel.app/> |
+| iPhone-frame preview | <https://year-countdown-wallpaper.vercel.app/preview> |
 
 Everything is computed from the device clock at page load, so a fresh screenshot each morning is
 always current. No backend, no build step.
@@ -24,7 +24,7 @@ always current. No backend, no build step.
 
 - Shortcuts app &rarr; new shortcut
 - **Get Contents of URL**:
-  `https://image.thum.io/get/width/1170/crop/2532/noanimate/https://<your-domain>/`
+  `https://image.thum.io/get/width/1170/crop/2532/noanimate/https://year-countdown-wallpaper.vercel.app/`
 - **Set Wallpaper** &rarr; Lock Screen, turn off *Show Preview*
 
 **2. Automation**
