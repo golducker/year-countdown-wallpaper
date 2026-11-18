@@ -96,6 +96,10 @@
   .ev p{font-weight:600;letter-spacing:-0.01em}
   /* under ~45 min: one centred line, allowed to spill a little past its slot */
   .ev.short{padding:0 0.7cqw 0 0.9cqw;display:flex;align-items:center;min-height:2.9cqw;font-size:2cqw;line-height:1}
+  .legend{margin-top:1.4cqh;display:flex;flex-wrap:wrap;justify-content:center;gap:0.8cqh 3.2cqw;font-size:2.4cqw;font-weight:500;color:var(--support)}
+  .legend:empty{display:none}
+  .legend span{display:inline-flex;align-items:center;gap:1.2cqw}
+  .legend i{width:1.8cqw;height:1.8cqw;border-radius:50%;background:var(--c)}
   .week-note{text-align:center;font-size:2.8cqw;color:var(--support);padding-top:1cqh}
 
   /* ---------- year countdown: status sits directly on top of the grid ---------- */
@@ -132,6 +136,7 @@
     <div class="safe-top"></div>
     <p class="quote" id="msg">Do the hard things, especially when you don&rsquo;t want to</p>
     <div class="week" id="week" aria-label="This week"></div>
+    <div class="legend" id="legend"></div>
     <div class="stats">
       <p class="status" id="status">&mdash;</p>
       <div class="grid" id="grid" role="img" aria-label="Year progress"></div>
@@ -319,6 +324,17 @@
         var byDay = {};
         data.days.forEach(function(d){ byDay[d.day] = d.events; });
         renderWeek(byDay);
+        // Legend: only calendars that have something this week, in the dashboard's colours.
+        var used = {};
+        data.days.forEach(function(d){ d.events.forEach(function(e){ used[e.calendar] = true; }); });
+        var legend = document.getElementById('legend');
+        (data.calendars || []).filter(function(c){ return used[c.name]; }).forEach(function(c){
+          // The primary calendar is named after the account email; keep that off the lock screen.
+          var item = el('span', null, c.name.indexOf('@') >= 0 ? 'Lịch chính' : c.name);
+          var dot = el('i'); dot.style.setProperty('--c', c.color);
+          item.insertBefore(dot, item.firstChild);
+          legend.appendChild(item);
+        });
       })
       .catch(function(){ renderWeek(null, 'Không tải được lịch'); })
       .finally(function(){ clearTimeout(timer); });

@@ -1,7 +1,6 @@
 // GET /shot                 -> today's wallpaper (date resolved server-side)
 // GET /shot/YYYY-MM-DD      -> a specific day
 // GET /shot?tz=Europe/Paris -> today in another time zone
-// GET /shot?force=1         -> bypass the render cache
 // GET /shot?k=<key>         -> include this week's calendar (WALLPAPER_KEY on the dashboard)
 //
 // Redirects to a microlink render of the page at a real iPhone 13 viewport
@@ -61,8 +60,10 @@ export default function handler(req, res) {
     '&viewport.height=844' +
     '&viewport.deviceScaleFactor=3' +
     '&screenshot.type=png' +
-    '&waitForSelector=' + encodeURIComponent('body[data-ready]') + // calendar fetched (or failed)
-    (req.query.force !== undefined ? '&force=true' : '');
+    // Always re-render: the URL only changes daily, but calendar events and colours change
+    // during the day, and a cached screenshot would show yesterday's state of the dashboard.
+    '&force=true' +
+    '&waitForSelector=' + encodeURIComponent('body[data-ready]'); // calendar fetched (or failed)
 
   res.setHeader('Cache-Control', 'no-store');
   res.redirect(302, api);
