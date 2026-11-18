@@ -13,22 +13,22 @@
      Quote  : change the text after 'YOUR QUOTE' in the <script>
               below (or pass ?msg=Hello in the URL).
      Accent : change --figure below (or pass ?accent=%23ff5500).
+     Calendar: pass ?k=<WALLPAPER_KEY> and the week is read from the
+              personal dashboard (/api/wallpaper/week). No key -> empty week.
 
      Rendered at a real iPhone 13 viewport (390x844 pt @3x = 1170x2532).
-     Hierarchy: the QUOTE is the hero. Below it, the days-left status sits
-     directly on top of the 365-dot grid — they are the same information —
-     with a percent/date caption closing the block. The whole block is
-     optically centred in the area under the widgets.
-     Top 40% is kept clear for the iOS clock, date, and the below-clock
-     widget tray (Weather + Google Calendar).
+     Top to bottom: iOS clock + date (kept clear), the QUOTE, this
+     week's calendar, then the year countdown (status, 365-dot grid,
+     caption). Bottom strip kept clear for the flashlight/camera buttons.
      ============================================================ */
   :root{
     --bg:#000000;
-    --label:#fcfaf6;                     /* the quote — nothing else */
+    --label:#fcfaf6;                     /* the quote */
     --figure:#f7b54e;                    /* days-left + percent numbers, today dot */
     --support:#d3cdc1;                   /* status + caption words (~13:1 on black) */
     --fill-past:rgba(247,181,78,0.46);   /* elapsed — warm */
     --fill-future:rgba(255,255,255,0.15);/* remaining — cool, still visible */
+    --card:rgba(255,255,255,0.06);
     --font:"Inter",-apple-system,"SF Pro Display","SF Pro Text",system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -47,50 +47,65 @@
     height:min(100vh, calc(100vw * 2532 / 1170));
     background:var(--bg);
     container-type:size;
-    display:flex;flex-direction:column;
-    padding:0 8cqw;
+    display:flex;flex-direction:column;align-items:center;
+    padding:0 4cqw;
   }
 
-  /* Status bar + clock + date + the below-clock widget tray live here. */
-  .safe-top{flex:0 0 40cqh}
+  /* Status bar + clock + date live here. */
+  .safe-top{flex:0 0 27cqh}
 
-  .stack{
-    flex:1 1 auto;min-height:0;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:2cqh 0 8.5cqh;
-  }
-
-  /* hero */
   .quote{
     max-width:84cqw;
-    font-size:8.6cqw;font-weight:600;line-height:1.14;letter-spacing:-0.018em;
+    font-size:6.6cqw;font-weight:600;line-height:1.14;letter-spacing:-0.018em;
     text-align:center;text-wrap:balance;color:var(--label);
   }
 
-  /* status sits directly on top of the grid — one unit */
-  .stats{margin-top:5.5cqh;display:flex;flex-direction:column;align-items:center;width:100%}
+  /* ---------- this week ---------- */
+  .week{
+    margin-top:3cqh;width:100%;
+    display:grid;grid-template-columns:repeat(7,1fr);gap:0.6cqw;
+    padding:1.2cqw;border-radius:3.6cqw;background:var(--card);
+    height:28cqh;overflow:hidden;align-items:start;
+  }
+  .day{min-width:0;display:flex;flex-direction:column;gap:0.8cqw;padding:1cqw 0.4cqw;border-radius:2.4cqw}
+  .day.today{background:rgba(255,255,255,0.14)}
+  .day h3{text-align:center;font-weight:500;font-size:2.8cqw;color:var(--support);line-height:1.2}
+  .day h3 b{display:block;font-size:4.4cqw;font-weight:700;color:var(--label)}
+  .ev{
+    border-radius:1.3cqw;padding:0.7cqw 0.8cqw;
+    background:color-mix(in srgb, var(--c) 62%, #000);
+    font-size:2.25cqw;line-height:1.25;color:#fff;
+  }
+  .ev span,.ev p{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ev span{font-size:1.8cqw;opacity:0.85;font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
+  .ev p{font-weight:600}
+  .more{text-align:center;font-size:2.3cqw;color:var(--support)}
+  .week-note{grid-column:1/-1;text-align:center;font-size:2.8cqw;color:var(--support);padding-top:1cqh}
+
+  /* ---------- year countdown: status sits directly on top of the grid ---------- */
+  .stats{margin-top:3.4cqh;display:flex;flex-direction:column;align-items:center;width:100%}
   .status{
-    font-size:5.2cqw;font-weight:500;line-height:1.2;
+    font-size:4.6cqw;font-weight:500;line-height:1.2;
     color:var(--support);letter-spacing:-0.005em;
   }
   .status b{font-weight:700;color:var(--figure)}
 
   .grid{
-    margin-top:2.2cqh;
-    display:grid;grid-template-columns:repeat(27,1fr);
-    gap:0.7cqw;width:84cqw;
+    margin-top:1.6cqh;
+    display:grid;grid-template-columns:repeat(37,1fr);
+    gap:0.55cqw;width:84cqw;
   }
   .dot{width:100%;aspect-ratio:1;border-radius:50%;background:var(--fill-future)}
   .dot.past{background:var(--fill-past)}
   .dot.today{
     background:var(--figure);
-    box-shadow:0 0 0 0.55cqw rgba(247,181,78,0.30),
-               0 0 1.6cqw rgba(247,181,78,0.55);
+    box-shadow:0 0 0 0.45cqw rgba(247,181,78,0.30),
+               0 0 1.3cqw rgba(247,181,78,0.55);
   }
 
   .meta{
-    margin-top:2.2cqh;
-    font-size:3.5cqw;font-weight:500;color:var(--support);
+    margin-top:1.6cqh;
+    font-size:3.3cqw;font-weight:500;color:var(--support);
     font-variant-numeric:tabular-nums;
   }
   .meta b{font-weight:700;color:var(--figure)}
@@ -99,19 +114,20 @@
 <body>
   <div class="frame">
     <div class="safe-top"></div>
-    <div class="stack">
-      <p class="quote" id="msg">Do the hard things, especially when you don&rsquo;t want to</p>
-      <div class="stats">
-        <p class="status" id="status">&mdash;</p>
-        <div class="grid" id="grid" role="img" aria-label="Year progress"></div>
-        <p class="meta" id="meta"></p>
-      </div>
+    <p class="quote" id="msg">Do the hard things, especially when you don&rsquo;t want to</p>
+    <div class="week" id="week" aria-label="This week"></div>
+    <div class="stats">
+      <p class="status" id="status">&mdash;</p>
+      <div class="grid" id="grid" role="img" aria-label="Year progress"></div>
+      <p class="meta" id="meta"></p>
     </div>
   </div>
 
 <script>
   (function(){
     var params = new URLSearchParams(location.search);
+    var DASHBOARD = 'https://personal-dashboard-liard-five.vercel.app';
+    var MAX_EVENTS = 6; // per day; the rest collapse into "+n"
 
     /* ---- YOUR QUOTE (edit the text in quotes) ---- */
     var MESSAGE = params.get('msg') || "Do the hard things, especially when you don’t want to";
@@ -156,6 +172,62 @@
       frag.appendChild(d);
     }
     grid.appendChild(frag);
+
+    /* ---- this week (Mon..Sun) ---- */
+    var LABELS = ['T2','T3','T4','T5','T6','T7','CN'];
+    var monday = new Date(now);
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    function key(dt){
+      return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+    }
+    var todayKey = key(now);
+
+    function el(tag, cls, text){
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    }
+
+    function renderWeek(days, note){
+      var week = document.getElementById('week');
+      week.textContent = '';
+      for (var i = 0; i < 7; i++){
+        var dt = new Date(monday); dt.setDate(monday.getDate() + i);
+        var k = key(dt);
+        var col = el('div', 'day' + (k === todayKey ? ' today' : ''));
+        var h = el('h3', null, LABELS[i]);
+        h.appendChild(el('b', null, String(dt.getDate())));
+        col.appendChild(h);
+        var evs = (days && days[k]) || [];
+        evs.slice(0, MAX_EVENTS).forEach(function(e){
+          var chip = el('div', 'ev');
+          chip.style.setProperty('--c', e.color || '#4285f4');
+          if (!e.allDay) chip.appendChild(el('span', null, e.start + '–' + e.end));
+          chip.appendChild(el('p', null, e.title)); // textContent: titles never parsed as HTML
+          col.appendChild(chip);
+        });
+        if (evs.length > MAX_EVENTS) col.appendChild(el('p', 'more', '+' + (evs.length - MAX_EVENTS)));
+        week.appendChild(col);
+      }
+      if (note) week.appendChild(el('p', 'week-note', note));
+      document.body.dataset.ready = '1'; // the screenshot service waits for this
+    }
+
+    var k = params.get('k');
+    if (!k){ renderWeek(null); return; }
+
+    var ctrl = new AbortController();
+    var timer = setTimeout(function(){ ctrl.abort(); }, 8000);
+    fetch(DASHBOARD + '/api/wallpaper/week?key=' + encodeURIComponent(k) + '&date=' + todayKey, {signal: ctrl.signal})
+      .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(data){
+        var byDay = {};
+        data.days.forEach(function(d){ byDay[d.day] = d.events; });
+        renderWeek(byDay);
+      })
+      .catch(function(){ renderWeek(null, 'Không tải được lịch'); })
+      .finally(function(){ clearTimeout(timer); });
   })();
 </script>
 </body>

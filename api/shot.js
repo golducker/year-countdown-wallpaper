@@ -2,6 +2,7 @@
 // GET /shot/YYYY-MM-DD      -> a specific day
 // GET /shot?tz=Europe/Paris -> today in another time zone
 // GET /shot?force=1         -> bypass the render cache
+// GET /shot?k=<key>         -> include this week's calendar (WALLPAPER_KEY on the dashboard)
 //
 // Redirects to a microlink render of the page at a real iPhone 13 viewport
 // (390x844 pt @3x => exactly 1170x2532 px).
@@ -47,7 +48,9 @@ export default function handler(req, res) {
 
   // The page reads ?date= so the countdown follows this date, not the
   // render server's clock.
-  const target = `${SITE}?date=${date}`;
+  // ?k= is forwarded so the page can read the calendar; without it the week renders empty.
+  const k = typeof req.query.k === 'string' && req.query.k ? req.query.k : null;
+  const target = `${SITE}?date=${date}` + (k ? `&k=${encodeURIComponent(k)}` : '');
 
   const api =
     'https://api.microlink.io/?url=' + encodeURIComponent(target) +
@@ -58,6 +61,7 @@ export default function handler(req, res) {
     '&viewport.height=844' +
     '&viewport.deviceScaleFactor=3' +
     '&screenshot.type=png' +
+    '&waitForSelector=' + encodeURIComponent('body[data-ready]') + // calendar fetched (or failed)
     (req.query.force !== undefined ? '&force=true' : '');
 
   res.setHeader('Cache-Control', 'no-store');
