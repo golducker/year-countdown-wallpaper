@@ -67,18 +67,6 @@
   .ios .lsdate{position:absolute;top:7.4cqh;left:0;right:0;text-align:center;font-size:3.3cqw;font-weight:600;color:rgba(235,235,245,0.75)}
   .ios .clock{position:absolute;top:9.4cqh;left:0;right:0;text-align:center;font-size:19cqw;font-weight:600;letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 1px 12px rgba(0,0,0,0.35)}
 
-  /* below-clock widget tray: Weather + Google Calendar */
-  .ios .tray{position:absolute;top:27cqh;left:0;right:0;display:flex;justify-content:center;gap:4cqw}
-  .ios .wdg{
-    width:19cqw;height:19cqw;border-radius:4.6cqw;padding:2.5cqw;
-    background:rgba(120,120,128,0.24);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;
-  }
-  .ios .wdg .wtop{font-size:2.2cqw;font-weight:600;color:rgba(235,235,245,0.72)}
-  .ios .wdg .wtemp{font-size:6.6cqw;font-weight:400;line-height:1}
-  .ios .wdg .wbot{font-size:2.3cqw;color:rgba(235,235,245,0.72)}
-  .ios .wdg.cal .cevt{font-size:2.7cqw;font-weight:600;display:flex;align-items:center;gap:1.3cqw;line-height:1.15}
-  .ios .wdg.cal .cevt::before{content:"";width:1.5cqw;height:1.5cqw;border-radius:50%;background:#4285f4;flex:0 0 auto}
 
   .ios .notif{
     position:absolute;left:4cqw;right:4cqw;top:70cqh;
@@ -105,10 +93,10 @@
 <div class="wrap">
   <header>
     <p class="eyebrow">iPhone 13 &middot; lock screen</p>
-    <h1>The quote leads; the year count sits on the grid</h1>
+    <h1>Quote under the clock, this week, then the year</h1>
     <p>The live <code>index.html</code> in an iPhone&nbsp;13 frame, with the real iOS clock, date
-      and a below-clock widget tray (Weather + Google Calendar) drawn on top. The top 40% of the
-      wallpaper is kept clear for that chrome. Right frame adds a notification &mdash; it lands
+      drawn on top. No widget tray: the top 28% of the wallpaper is kept clear for the
+      clock, and the week calendar takes the place of the Calendar widget. Right frame adds a notification &mdash; it lands
       over the grid, below the quote.</p>
   </header>
 
@@ -124,24 +112,12 @@
           </div>
           <div class="lsdate"></div>
           <div class="clock"></div>
-          <div class="tray">
-            <div class="wdg">
-              <div class="wtop">Cupertino</div>
-              <div class="wtemp">72&deg;</div>
-              <div class="wbot">Sunny</div>
-            </div>
-            <div class="wdg cal">
-              <div class="wtop">TUE 9</div>
-              <div class="cevt">Standup</div>
-              <div class="wbot">10:00 AM</div>
-            </div>
-          </div>
           <div class="sysbtn l"><svg viewBox="0 0 24 24"><path d="M9 2h6l-1 7h-4L9 2zm1 9h4v4a2 2 0 0 1-4 0v-4zm1 6h2v5h-2v-5z"/></svg></div>
           <div class="sysbtn r"><svg viewBox="0 0 24 24"><path d="M9 3l-1.5 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.5L15 3H9zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10z"/></svg></div>
           <div class="home"></div>
         </div>
       </div></div>
-      <div class="cap"><div class="name">Resting</div><p>Clock + Weather + Calendar widgets, then the message</p></div>
+      <div class="cap"><div class="name">Resting</div><p>Clock, quote, this week, year</p></div>
     </div>
 
     <div class="item">
@@ -155,18 +131,6 @@
           </div>
           <div class="lsdate"></div>
           <div class="clock"></div>
-          <div class="tray">
-            <div class="wdg">
-              <div class="wtop">Cupertino</div>
-              <div class="wtemp">72&deg;</div>
-              <div class="wbot">Sunny</div>
-            </div>
-            <div class="wdg cal">
-              <div class="wtop">TUE 9</div>
-              <div class="cevt">Standup</div>
-              <div class="wbot">10:00 AM</div>
-            </div>
-          </div>
           <div class="notif">
             <div class="ni"></div>
             <div class="nb">
@@ -189,6 +153,7 @@
   var timeStr = now.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}).replace(/\s?[AP]M$/i,'');
   var dateLong = now.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'});
 
+  document.querySelectorAll('iframe').forEach(function(f){ f.src = 'index.html' + location.search; });
   document.querySelectorAll('.ios').forEach(function(ios){
     ios.querySelector('.time').textContent = timeStr;
     ios.querySelector('.lsdate').textContent = dateLong;

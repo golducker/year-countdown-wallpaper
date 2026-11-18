@@ -28,7 +28,6 @@
     --support:#d3cdc1;                   /* status + caption words (~13:1 on black) */
     --fill-past:rgba(247,181,78,0.46);   /* elapsed — warm */
     --fill-future:rgba(255,255,255,0.15);/* remaining — cool, still visible */
-    --card:rgba(255,255,255,0.06);
     --font:"Inter",-apple-system,"SF Pro Display","SF Pro Text",system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -51,39 +50,56 @@
     padding:0 4cqw;
   }
 
-  /* Status bar + clock + date live here. */
-  .safe-top{flex:0 0 27cqh}
+  /* Status bar + date + clock live here (no widget tray: the week below replaces it). */
+  .safe-top{flex:0 0 28cqh}
 
   .quote{
     max-width:84cqw;
-    font-size:6.6cqw;font-weight:600;line-height:1.14;letter-spacing:-0.018em;
+    font-size:6cqw;font-weight:600;line-height:1.14;letter-spacing:-0.018em;
     text-align:center;text-wrap:balance;color:var(--label);
   }
 
-  /* ---------- this week ---------- */
+  /* ---------- this week ----------
+     Time grid straight on the black: events sit at their real time of day,
+     overlaps share the column side by side. Amber keeps its one meaning
+     ("today / now"), the calendar's own colour is only a thin left bar. */
   .week{
     margin-top:3cqh;width:100%;
-    display:grid;grid-template-columns:repeat(7,1fr);gap:0.6cqw;
-    padding:1.2cqw;border-radius:3.6cqw;background:var(--card);
-    height:28cqh;overflow:hidden;align-items:start;
+    display:flex;flex-direction:column;gap:0.8cqh;
+    height:29cqh;overflow:hidden;
   }
-  .day{min-width:0;display:flex;flex-direction:column;gap:0.8cqw;padding:1cqw 0.4cqw;border-radius:2.4cqw}
-  .day.today{background:rgba(255,255,255,0.14)}
-  .day h3{text-align:center;font-weight:500;font-size:2.8cqw;color:var(--support);line-height:1.2}
-  .day h3 b{display:block;font-size:4.4cqw;font-weight:700;color:var(--label)}
+  .wk-row{display:grid;grid-template-columns:4.4cqw repeat(7,minmax(0,1fr));column-gap:0.7cqw}
+  .wk-head h3{
+    text-align:center;font-weight:500;font-size:2.6cqw;color:var(--support);line-height:1.2;
+  }
+  .wk-head h3 b{display:block;font-size:4.4cqw;font-weight:600;color:var(--label);letter-spacing:-0.01em;font-variant-numeric:tabular-nums}
+  .wk-head h3.today,.wk-head h3.today b{color:var(--figure)}
+  .wk-allday .ev{position:static}
+  .wk-body{flex:1 1 auto;min-height:0;position:relative}
+  .wk-body .col{position:relative;height:100%;border-radius:1.2cqw}
+  .wk-body .col.today{background:rgba(247,181,78,0.07)}
+  .hline{position:absolute;left:5.1cqw;right:0;height:0;border-top:1px solid rgba(255,255,255,0.07)}
+  .hline.major{border-top-color:rgba(255,255,255,0.16)}
+  .hlabel{
+    position:absolute;left:0;width:3.8cqw;text-align:right;transform:translateY(-50%);
+    font-size:2.1cqw;font-weight:500;color:rgba(211,205,193,0.75);font-variant-numeric:tabular-nums;
+  }
   .ev{
-    border-radius:1.3cqw;padding:0.7cqw 0.8cqw;
-    background:color-mix(in srgb, var(--c) 62%, #000);
-    font-size:2.25cqw;line-height:1.25;color:#fff;
+    position:absolute;overflow:hidden;
+    border-radius:1cqw;padding:0.5cqw 0.7cqw 0.5cqw 0.9cqw;
+    background:color-mix(in oklab, var(--c) 30%, #0d0c0b);
+    box-shadow:inset 0.55cqw 0 0 var(--c);
+    font-size:2.3cqw;line-height:1.2;color:var(--label);
   }
   .ev span,.ev p{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ev span{font-size:1.8cqw;opacity:0.85;font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
-  .ev p{font-weight:600}
-  .more{text-align:center;font-size:2.3cqw;color:var(--support)}
-  .week-note{grid-column:1/-1;text-align:center;font-size:2.8cqw;color:var(--support);padding-top:1cqh}
+  .ev span{font-size:1.9cqw;color:var(--support);font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+  .ev p{font-weight:600;letter-spacing:-0.01em}
+  /* under ~45 min: one centred line, allowed to spill a little past its slot */
+  .ev.short{padding:0 0.7cqw 0 0.9cqw;display:flex;align-items:center;min-height:2.9cqw;font-size:2cqw;line-height:1}
+  .week-note{text-align:center;font-size:2.8cqw;color:var(--support);padding-top:1cqh}
 
   /* ---------- year countdown: status sits directly on top of the grid ---------- */
-  .stats{margin-top:3.4cqh;display:flex;flex-direction:column;align-items:center;width:100%}
+  .stats{margin-top:3cqh;display:flex;flex-direction:column;align-items:center;width:100%}
   .status{
     font-size:4.6cqw;font-weight:500;line-height:1.2;
     color:var(--support);letter-spacing:-0.005em;
@@ -127,7 +143,6 @@
   (function(){
     var params = new URLSearchParams(location.search);
     var DASHBOARD = 'https://personal-dashboard-liard-five.vercel.app';
-    var MAX_EVENTS = 6; // per day; the rest collapse into "+n"
 
     /* ---- YOUR QUOTE (edit the text in quotes) ---- */
     var MESSAGE = params.get('msg') || "Do the hard things, especially when you don’t want to";
@@ -189,27 +204,106 @@
       return n;
     }
 
+    function hours(hhmm){ var p = hhmm.split(':'); return +p[0] + (+p[1]) / 60; }
+
+    // Timed events of one day -> {e, s, f, lane, lanes}. Overlapping events form a
+    // cluster; each gets the first free lane, and the whole cluster shares the width.
+    function layoutDay(evs){
+      var items = evs.map(function(e){
+        var s = hours(e.start), f = hours(e.end);
+        if (f <= s) f = 24; // ends after midnight: clip to the end of this day
+        return {e:e, s:s, f:f};
+      }).sort(function(a, b){ return a.s - b.s || b.f - a.f; });
+      var cluster = [], laneEnds = [], clusterEnd = -1;
+      function close(){ cluster.forEach(function(it){ it.lanes = laneEnds.length; }); cluster = []; laneEnds = []; }
+      items.forEach(function(it){
+        if (it.s >= clusterEnd) close();
+        var lane = laneEnds.findIndex(function(end){ return end <= it.s; });
+        if (lane < 0) lane = laneEnds.length;
+        laneEnds[lane] = it.f;
+        it.lane = lane;
+        cluster.push(it);
+        clusterEnd = Math.max(clusterEnd, it.f);
+      });
+      close();
+      return items;
+    }
+
     function renderWeek(days, note){
       var week = document.getElementById('week');
       week.textContent = '';
+      var keys = [], timed = [], allDay = [];
       for (var i = 0; i < 7; i++){
         var dt = new Date(monday); dt.setDate(monday.getDate() + i);
-        var k = key(dt);
-        var col = el('div', 'day' + (k === todayKey ? ' today' : ''));
-        var h = el('h3', null, LABELS[i]);
-        h.appendChild(el('b', null, String(dt.getDate())));
-        col.appendChild(h);
-        var evs = (days && days[k]) || [];
-        evs.slice(0, MAX_EVENTS).forEach(function(e){
-          var chip = el('div', 'ev');
-          chip.style.setProperty('--c', e.color || '#4285f4');
-          if (!e.allDay) chip.appendChild(el('span', null, e.start + '–' + e.end));
-          chip.appendChild(el('p', null, e.title)); // textContent: titles never parsed as HTML
+        keys.push(key(dt));
+        var evs = (days && days[keys[i]]) || [];
+        timed.push(layoutDay(evs.filter(function(e){ return !e.allDay; })));
+        allDay.push(evs.filter(function(e){ return e.allDay; }));
+      }
+
+      // Visible hours: 7:00-22:00, widened to whatever this week actually uses.
+      var from = 7, to = 22;
+      timed.forEach(function(list){ list.forEach(function(it){
+        from = Math.min(from, Math.floor(it.s)); to = Math.max(to, Math.ceil(it.f));
+      }); });
+      var span = to - from;
+      function pct(h){ return ((h - from) / span * 100) + '%'; }
+
+      var head = el('div', 'wk-row wk-head');
+      head.appendChild(el('span'));
+      keys.forEach(function(k, i){
+        var h = el('h3', k === todayKey ? 'today' : null, LABELS[i]);
+        h.appendChild(el('b', null, String(+k.slice(8))));
+        head.appendChild(h);
+      });
+      week.appendChild(head);
+
+      if (allDay.some(function(l){ return l.length; })){
+        var strip = el('div', 'wk-row wk-allday');
+        strip.appendChild(el('span'));
+        allDay.forEach(function(list){
+          var cell = el('div');
+          if (list.length){
+            var chip = el('div', 'ev');
+            chip.style.setProperty('--c', list[0].color || '#4285f4');
+            chip.appendChild(el('p', null, list[0].title + (list.length > 1 ? ' +' + (list.length - 1) : '')));
+            cell.appendChild(chip);
+          }
+          strip.appendChild(cell);
+        });
+        week.appendChild(strip);
+      }
+
+      var body = el('div', 'wk-row wk-body');
+      var axis = el('div');
+      body.appendChild(axis);
+      for (var hr = from; hr <= to; hr++){
+        if (hr > from && hr < to){
+          var line = el('div', 'hline' + (hr % 3 === 0 ? ' major' : '')); line.style.top = pct(hr); body.appendChild(line);
+        }
+        if (hr % 3 === 0 && hr > from && hr < to){
+          var lab = el('span', 'hlabel', String(hr)); lab.style.top = pct(hr); body.appendChild(lab);
+        }
+      }
+      timed.forEach(function(list, i){
+        var col = el('div', 'col' + (keys[i] === todayKey ? ' today' : ''));
+        list.forEach(function(it){
+          var frac = (it.f - it.s) / span; // share of the body height; the hour range varies by week
+          var chip = el('div', 'ev' + (frac < 0.075 ? ' short' : ''));
+          chip.style.setProperty('--c', it.e.color || '#4285f4');
+          chip.style.top = pct(it.s);
+          chip.style.height = 'calc(' + ((it.f - it.s) / span * 100) + '% - 1px)';
+          chip.style.left = (it.lane / it.lanes * 100) + '%';
+          chip.style.width = 'calc(' + (100 / it.lanes) + '% - 1px)';
+          // Start time only (the chip's height already shows the end), and only where two lines fit.
+          if (frac >= 0.12 && it.lanes === 1) chip.appendChild(el('span', null, it.e.start));
+          chip.appendChild(el('p', null, it.e.title)); // textContent: titles never parsed as HTML
           col.appendChild(chip);
         });
-        if (evs.length > MAX_EVENTS) col.appendChild(el('p', 'more', '+' + (evs.length - MAX_EVENTS)));
-        week.appendChild(col);
-      }
+        body.appendChild(col);
+      });
+      week.appendChild(body);
+
       if (note) week.appendChild(el('p', 'week-note', note));
       document.body.dataset.ready = '1'; // the screenshot service waits for this
     }
